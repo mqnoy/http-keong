@@ -1,0 +1,42 @@
+# Dependency directories
+node_modules/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Coverage reports
+coverage/
+*.lcov
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Environments
+.env*
+
+# IDEs
+.vscode/
+.idea/
+
+# Husky / Git
+.husky/
+.git/
+
+# Generated code
+src/grpc/generated/
+src/features/whats-app/infrastructure/baileys/temp/
+
+# Lock files
+
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+*.mjs
+*.yaml
+package.json
+*.md
+lint-staged.config.js
