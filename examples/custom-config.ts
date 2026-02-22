@@ -1,12 +1,11 @@
 import 'reflect-metadata';
 import express from 'express';
 import { KeongFactory, Controller, Get, ApiResponse } from '../index';
-import { KeongRequest } from '../http/requests';
 
 @Controller('/config-test')
 class ConfigTestController {
   @Get('/')
-  test(req: KeongRequest) {
+  test(req: express.Request) {
     // Manually adding to context
     req.ctx = { ...req.ctx, uniqueValue: 'keong-123' };
 

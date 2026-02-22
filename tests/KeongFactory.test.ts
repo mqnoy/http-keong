@@ -29,6 +29,7 @@ class TestController {
 describe('KeongFactory', () => {
   it('should create an express application with registered routes', async () => {
     // Arrange
+    HttpKeongConfig.isDebug = true;
     const controllers = [TestController];
     const options = {
       customConfiguration: (_app: any) => {},
@@ -41,20 +42,22 @@ describe('KeongFactory', () => {
     const response = await request(app).get('/test/hello');
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ message: 'hello' });
+    expect(response.header['x-powered-by']).toBe('Keong');
   });
 
-  it('should handle ApiResponse correctly', async () => {
+  it('should handle ApiResponse correctly with meta in debug mode', async () => {
     // Arrange
+    HttpKeongConfig.isDebug = true;
     const controllers = [TestController];
     const options = {
       customConfiguration: (_app: any) => {},
     };
-
-    // Act
     const app = KeongFactory.create(controllers, options);
 
-    // Assert
+    // Act
     const response = await request(app).get('/test/response');
+
+    // Assert
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       data: { data: 'ok' },
@@ -63,12 +66,34 @@ describe('KeongFactory', () => {
         message: 'Success',
         checksum: expect.any(String),
         timestamp: expect.any(String),
+        requestId: expect.any(String),
       },
     });
   });
 
+  it('should exclude meta in production mode (isDebug = false)', async () => {
+    // Arrange
+    HttpKeongConfig.isDebug = false;
+    const controllers = [TestController];
+    const options = {
+      customConfiguration: (_app: any) => {},
+    };
+    const app = KeongFactory.create(controllers, options);
+
+    // Act
+    const response = await request(app).get('/test/response');
+
+    // Assert
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      data: { data: 'ok' },
+    });
+    expect(response.body.meta).toBeUndefined();
+  });
+
   it('should use the provided logger for debug and info messages', async () => {
     // Arrange
+    HttpKeongConfig.isDebug = true;
     const mockLogger = {
       info: jest.fn(),
       debug: jest.fn(),
@@ -84,7 +109,6 @@ describe('KeongFactory', () => {
     };
 
     // Act
-    HttpKeongConfig.isDebug = true;
     KeongFactory.create(controllers, options);
 
     // Assert

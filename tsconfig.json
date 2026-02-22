@@ -31,6 +31,10 @@
     "noPropertyAccessFromIndexSignature": true,
     "baseUrl": ".",
   },
-  "include": ["core/**/*.ts", "decorators/**/*.ts", "http/**/*.ts", "index.ts", "tests/**/*.ts", "examples/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["core/**/*.ts", "decorators/**/*.ts", "middlewares/**/*.ts", "http/**/*.ts", "index.ts", "tests/**/*.ts", "examples/**/*.ts", "types/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "files": true,
+    "transpileOnly": true
+  }
 }

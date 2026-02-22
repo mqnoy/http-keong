@@ -7,13 +7,24 @@ import { ApiResponse, isApiResponseData } from '../http/responses';
 import { METADATA_KEYS } from './metadata';
 import { HttpKeongConfig, MetaExtractor, ResponseCodeConfig } from './config';
 import { SWAGGER_SCHEMA_REGISTRY } from '../decorators/swagger';
+import { requestIdMiddleware } from '../middlewares/request-id';
 
+/**
+ * Constructor type for generic class instantiation.
+ */
 export type Constructor<T = object> = new (...args: any[]) => T;
 
+/**
+ * Interface for Dependency Injection containers.
+ * Must implement a resolve method that takes a constructor and returns an instance.
+ */
 export interface DIContainer {
   resolve<T>(target: Constructor<T>): T;
 }
 
+/**
+ * Standard Express error handler type definition.
+ */
 export type ErrorHandler = (
   err: Error,
   req: express.Request,
@@ -21,14 +32,25 @@ export type ErrorHandler = (
   next: express.NextFunction
 ) => void;
 
+/**
+ * Options for configuring Swagger documentation.
+ */
 export interface SwaggerOptions {
+  /** The path where Swagger UI will be available (default: /api-docs) */
   path?: string;
+  /** Title of the API documentation */
   title?: string;
+  /** Version of the API */
   version?: string;
+  /** Description of the API */
   description?: string;
+  /** List of servers for the API */
   servers?: { url: string; description?: string }[];
 }
 
+/**
+ * Standard logger interface compatible with common logging libraries like @mqnoy/lolog.
+ */
 export interface ILogger {
   info(msg: string, ...args: unknown[]): void;
   info(obj: object, msg?: string, ...args: unknown[]): void;
@@ -44,14 +66,30 @@ export interface ILogger {
   fatal(obj: object, msg?: string, ...args: unknown[]): void;
 }
 
+/**
+ * Options for KeongFactory.create to configure the Express application.
+ */
 export interface KeongFactoryOptions {
-  container?: DIContainer;
-  errorHandler?: ErrorHandler;
-  fallbackHandler?: express.Handler;
+  /** Callback for custom Express application configuration (e.g., adding world middlewares) */
   customConfiguration: (app: express.Application) => void;
+  /** Optional Dependency Injection container */
+  container?: DIContainer;
+  /** Optional global error handler */
+  errorHandler?: ErrorHandler;
+  /** Optional fallback handler (e.g., for 404 routes not handled by controllers) */
+  fallbackHandler?: express.Handler;
+  /** Configuration for a health check endpoint */
+  healthCheckHandler?: {
+    path: string;
+    handler: express.Handler;
+  };
+  /** Swagger documentation configuration */
   swagger?: SwaggerOptions;
+  /** Logger implementation */
   logger?: ILogger;
+  /** Custom metadata extractor for responses */
   metaExtractor?: MetaExtractor;
+  /** Custom business logic codes for responses */
   responseCodes?: Partial<ResponseCodeConfig>;
 }
 
@@ -84,9 +122,28 @@ export class KeongFactory {
 
     const logger = options.logger;
     const app = express();
+    app.disable('x-powered-by');
+    app.use((_req, res, next) => {
+      res.setHeader('X-Powered-By', 'Keong');
+      next();
+    });
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+    app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      req.ctx = { requestId: '' };
+      next();
+    });
 
+    app.use(requestIdMiddleware);
+    if (options.healthCheckHandler) {
+      app.use(options.healthCheckHandler.path, options.healthCheckHandler.handler);
+    } else {
+      app.use('/health', (_req: express.Request, res: express.Response) => {
+        res.status(200).send('OK');
+      });
+    }
+
+    // Custom configuration
     options.customConfiguration(app);
 
     const registeredRoutes: { method: string; path: string; controller: string; handler: string }[] = [];

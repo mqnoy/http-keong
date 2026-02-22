@@ -10,6 +10,7 @@ import {
   ApiTags,
   ApiDocResponse,
   ApiProperty,
+  HttpKeongConfig,
 } from '../index';
 
 // Arrange: Define DTOs and Controllers
@@ -49,18 +50,21 @@ class ItemController {
 describe('Real World Integration', () => {
   let app: express.Application;
 
-  beforeAll(() => {
-    // Act: Create the application
-    app = KeongFactory.create([ItemController], {
-      swagger: {}, // Enable swagger documentation
+  const createApp = (isDebug: boolean = true) => {
+    HttpKeongConfig.isDebug = isDebug;
+    return KeongFactory.create([ItemController], {
+      swagger: {},
       customConfiguration: (expressApp) => {
         expressApp.use(express.json());
       },
     });
-  });
+  };
 
   describe('GET /items', () => {
-    it('should return a list of items with standard success format', async () => {
+    it('should return a list of items with meta in debug mode', async () => {
+      // Arrange
+      app = createApp(true);
+
       // Act
       const response = await request(app).get('/items');
 
@@ -70,10 +74,26 @@ describe('Real World Integration', () => {
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.meta.code).toBe('SUCCESS');
     });
+
+    it('should return a list of items without meta in production mode', async () => {
+      // Arrange
+      app = createApp(false);
+
+      // Act
+      const response = await request(app).get('/items');
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBeDefined();
+      expect(response.body.meta).toBeUndefined();
+    });
   });
 
   describe('POST /items', () => {
     it('should create a new item when valid data is provided', async () => {
+      // Arrange
+      app = createApp(true);
+
       // Act
       const response = await request(app).post('/items').send({ name: 'New Item' });
 
@@ -84,6 +104,9 @@ describe('Real World Integration', () => {
     });
 
     it('should return 400 when custom middleware validation fails', async () => {
+      // Arrange
+      app = createApp(true);
+
       // Act
       const response = await request(app).post('/items').send({});
 
@@ -95,6 +118,9 @@ describe('Real World Integration', () => {
 
   describe('Swagger UI', () => {
     it('should expose swagger documentation at /api-docs', async () => {
+      // Arrange
+      app = createApp(true);
+
       // Act
       const response = await request(app).get('/api-docs/');
 

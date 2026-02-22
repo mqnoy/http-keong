@@ -18,7 +18,10 @@ module.exports = {
       },
     ],
   },
-  moduleNameMapper: {},
+  moduleNameMapper: {
+    '^middlewares/(.*)$': '<rootDir>/middlewares/$1',
+  },
+  transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   testMatch: ['**/tests/**/*.test.ts'],
 };

@@ -14,7 +14,6 @@ import {
   ApiProperty,
   ApiBody,
 } from '../index';
-import { KeongRequest } from '../http/requests';
 import logger from '@mqnoy/lolog';
 
 // --- DTOs (Data Transfer Objects) ---
@@ -60,13 +59,12 @@ const users: User[] = [
  * Middleware that authenticates a user and populates req.ctx.
  * In a real app, this would verify a JWT.
  */
-const authMiddleware = (req: KeongRequest, _res: express.Response, next: express.NextFunction) => {
+const authMiddleware = (req: express.Request, _res: express.Response, next: express.NextFunction) => {
   // Simulate authentication
   const authHeader = req.headers.authorization;
 
   // Attach context that will be automatically included in response metadata
   req.ctx = {
-    requestId: Math.random().toString(36).substring(7),
     authenticatedUser: authHeader ? { id: 1, role: 'ADMIN' } : null,
     accessLevel: authHeader ? 'ADMIN' : 'GUEST',
   };
@@ -100,7 +98,7 @@ class UserController {
   @ApiOperation({ summary: 'Create a new user', description: 'Requires admin privileges' })
   @ApiDocResponse(201, { description: 'User created successfully', type: UserDto })
   @ApiDocResponse(400, { description: 'Invalid input' })
-  createUser(req: KeongRequest) {
+  createUser(req: express.Request) {
     const { name, email } = req.body;
 
     // Demonstrate context usage in logic

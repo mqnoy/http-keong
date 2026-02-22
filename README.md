@@ -105,12 +105,25 @@ class UserDto {
 
 ### 💎 Standardized JSON Responses
 The specialized `ApiResponse` class ensures your API always speaks the same language.
-- **Format**: `{ data: ..., meta: { code: "SUCCESS", checksum: "...", timestamp: "..." } }`
+- **Format**: `{ data: ..., meta: { code: "SUCCESS", message: "...", checksum: "...", timestamp: "..." } }`
 - **Helper methods**: `ApiResponse.success()`, `ApiResponse.created()`, `ApiResponse.error()`, `ApiResponse.notFound()`, etc.
 
----
+> [!NOTE]
+> The `meta` object is only included when debug mode is enabled. In production, only the `data` (and `code`/`message` for errors) will be returned.
 
-## ⚙️ Advanced Features
+### 🛠 Configuration & Debug Mode
+You can enable debug mode to see detailed metadata in your responses.
+
+```bash
+# Enable debug mode via environment variable
+HTTP_KEONG_DEBUG=true pnpm run dev
+```
+
+When `HTTP_KEONG_DEBUG` is `true`, `http-keong` will:
+1. Include the `meta` object in all JSON responses.
+2. Generate a base64 `checksum` for the data payload.
+3. Include an ISO `timestamp` in the response.
+4. Print the route table to the console on startup.
 
 ### 🧩 Generic Request Context (`KeongRequest`)
 Extend the standard Express request with your own custom context types.
