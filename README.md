@@ -125,18 +125,7 @@ When `HTTP_KEONG_DEBUG` is `true`, `http-keong` will:
 3. Include an ISO `timestamp` in the response.
 4. Print the route table to the console on startup.
 
-### 🧩 Generic Request Context (`KeongRequest`)
-Extend the standard Express request with your own custom context types.
-```typescript
-interface MyCtx { user: { id: string; role: string } }
-
-@Get('/profile')
-getProfile(req: KeongRequest<MyCtx>) {
-  const userId = req.ctx?.user.id; // Fully Typed!
-}
-```
-
-### 🪵 Custom Logger Injection
+###  Custom Logger Injection
 Integrates seamlessly with `@mqnoy/lolog` or any logger implementing the `ILogger` interface.
 ```typescript
 KeongFactory.create(controllers, { logger: myLogger });
