@@ -1,6 +1,6 @@
 {
   "name": "@mqnoy/http-keong",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A light and steady decorator-based wrapper for Express.js with automatic Swagger documentation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

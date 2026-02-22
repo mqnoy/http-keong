@@ -5,7 +5,7 @@
 </div>
 
 ---
-`http-keong` is a developer-friendly, decorator-powered wrapper for Express.js. It brings the architectural elegance of frameworks like NestJS to the lightweight Express ecosystem, featuring automatic **Swagger UI generation**, **Standardized JSON Responses**, and **Type-Safe Request Contexts**.
+`http-keong` is a developer-friendly, decorator-powered wrapper for Express.js. It brings the architectural elegance of frameworks like NestJS to the lightweight Express ecosystem, featuring automatic **Swagger UI generation**, **Standardized JSON Responses**, and **Context-Aware Request Augmentation**.
 
 ---
 
@@ -105,11 +105,29 @@ class UserDto {
 
 ### 💎 Standardized JSON Responses
 The specialized `ApiResponse` class ensures your API always speaks the same language.
-- **Format**: `{ data: ..., meta: { code: "SUCCESS", message: "...", checksum: "...", timestamp: "..." } }`
-- **Helper methods**: `ApiResponse.success()`, `ApiResponse.created()`, `ApiResponse.error()`, `ApiResponse.notFound()`, etc.
 
-> [!NOTE]
-> The `meta` object is only included when debug mode is enabled. In production, only the `data` (and `code`/`message` for errors) will be returned.
+**Production Format (Default)**:
+```json
+{
+  "data": { "id": 1, "name": "John Doe" }
+}
+```
+
+**Debug Format (`HTTP_KEONG_DEBUG=true`)**:
+```json
+{
+  "data": { "id": 1, "name": "John Doe" },
+  "meta": {
+    "code": "SUCCESS",
+    "message": "Operation successful",
+    "checksum": "a1b2c3d4e5",
+    "timestamp": "2024-02-22T20:00:00.000Z",
+    "requestId": "uuid-v4-abc"
+  }
+}
+```
+
+- **Helper methods**: `ApiResponse.success()`, `ApiResponse.created()`, `ApiResponse.error()`, `ApiResponse.notFound()`, etc.
 
 ### 🛠 Configuration & Debug Mode
 You can enable debug mode to see detailed metadata in your responses.
@@ -125,7 +143,30 @@ When `HTTP_KEONG_DEBUG` is `true`, `http-keong` will:
 3. Include an ISO `timestamp` in the response.
 4. Print the route table to the console on startup.
 
-###  Custom Logger Injection
+### 🧩 Context-Aware Requests
+`http-keong` automatically augments the Express `Request` object with a `ctx` property, which includes a `requestId` by default. You can extend this context for your own needs.
+
+```typescript
+@Get('/me')
+getMe(req: Request) {
+  const requestId = req.ctx.requestId;
+  return ApiResponse.success({ id: 1, reqId: requestId });
+}
+```
+
+### 🏥 Built-in Health Check
+A dedicated health check endpoint is available by default at `/health`. You can customize the path and handler if needed.
+
+```typescript
+KeongFactory.create(controllers, {
+  healthCheckHandler: {
+    path: '/ping',
+    handler: (req, res) => res.send('pong')
+  }
+});
+```
+
+### 🪵 Custom Logger Injection
 Integrates seamlessly with `@mqnoy/lolog` or any logger implementing the `ILogger` interface.
 ```typescript
 KeongFactory.create(controllers, { logger: myLogger });
