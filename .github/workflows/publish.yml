@@ -1,0 +1,60 @@
+name: Publish to NPM
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Check version and Publish
+        id: publish
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # Check if this version exists on NPM
+          if npm view @mqnoy/http-keong@$CURRENT_VERSION version >/dev/null 2>&1; then
+            echo "Version $CURRENT_VERSION already exists on NPM. Skipping publish."
+            echo "publish_occurred=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version detected ($CURRENT_VERSION). Publishing..."
+            npm publish --access public
+            echo "publish_occurred=true" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create Git Tag
+        if: steps.publish.outputs.publish_occurred == 'true'
+        run: |
+          VERSION=${{ steps.publish.outputs.version }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a v$VERSION -m "Release v$VERSION"
+          git push origin v$VERSION
