@@ -104,11 +104,11 @@ class UserController {
     // Demonstrate context usage in logic
     const currentUser = req.ctx?.['authenticatedUser'];
     if (!currentUser) {
-      return ApiResponse.error('UNAUTHORIZED', 'Authenticated user required', 401);
+      return ApiResponse.error('Authenticated user required', 'UNAUTHORIZED', 401);
     }
 
     if (!name || !email) {
-      return ApiResponse.error('INVALID_INPUT', 'Name and email are required fields', 400);
+      return ApiResponse.error('Name and email are required fields', 'INVALID_INPUT', 400);
     }
 
     const newUser: User = { id: users.length + 1, name, email, role: 'USER' };

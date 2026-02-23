@@ -103,8 +103,31 @@ class UserDto {
 }
 ```
 
-### 💎 Standardized JSON Responses
-The specialized `ApiResponse` class ensures your API always speaks the same language.
+### 💎 Standardized JSON Responses & Errors
+The specialized `ApiResponse` class ensures your API always speaks the same language. All response and error helpers follow a **"Message First"** convention for better readability.
+
+#### 1. Success Responses
+Use static helpers for consistent data delivery.
+
+```typescript
+// Simple success (Defaults: message="Success", code="SUCCESS")
+return ApiResponse.success({ id: 1 }); 
+
+// Custom message and business code
+return ApiResponse.success(data, 'User updated successfully', 'UPDATE_OK');
+```
+
+#### 2. Error Handling
+You can throw built-in error classes or return an error response manually.
+
+```typescript
+// Standard Errors (message first)
+throw new NotFoundError('User profile not found');
+throw new ValidationHttpError('Invalid payload', { email: 'is required' });
+
+// Generic Error Helper
+return ApiResponse.error('Connection timed out', 'GATEWAY_ERROR', 504);
+```
 
 **Production Format (Default)**:
 ```json
@@ -126,8 +149,6 @@ The specialized `ApiResponse` class ensures your API always speaks the same lang
   }
 }
 ```
-
-- **Helper methods**: `ApiResponse.success()`, `ApiResponse.created()`, `ApiResponse.error()`, `ApiResponse.notFound()`, etc.
 
 ### 🛠 Configuration & Debug Mode
 You can enable debug mode to see detailed metadata in your responses.

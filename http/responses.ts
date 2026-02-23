@@ -43,13 +43,13 @@ export abstract class ApiResponse {
 
   /**
    * Creates a standardized Error JSON response.
-   * @param code - Optional business logic code (defaults to ERROR).
    * @param message - Optional error message.
+   * @param code - Optional business logic code (defaults to ERROR).
    * @param statusCode - HTTP status code (default: 400).
    * @returns A JsonResponse instance.
-   * @example return ApiResponse.error('PAYMENT_REQUIRED', 'Balance insufficient', 402);
+   * @example return ApiResponse.error('Balance insufficient', 'PAYMENT_REQUIRED', 402);
    */
-  static error(code?: string, message: string = 'Error', statusCode: number = 400) {
+  static error(message: string = 'Error', code?: string, statusCode: number = 400) {
     return new JsonResponse(code || HttpKeongConfig.responseCodes.error, message, null, statusCode);
   }
 
