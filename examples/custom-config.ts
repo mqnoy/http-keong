@@ -15,7 +15,7 @@ class ConfigTestController {
   @Get('/error')
   testError() {
     // This will use the configured custom business code for errors
-    return ApiResponse.error(undefined, 'Something failed');
+    return ApiResponse.error('Something failed');
   }
 }
 

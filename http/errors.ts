@@ -7,17 +7,17 @@ import { HttpKeongConfig } from '../core/config';
  */
 export class HttpError extends Error {
   /**
-   * @param code - Internal business logic error code.
    * @param message - Human-readable error message.
-   * @param validationErrors - Optional object containing validation failure details.
+   * @param code - Internal business logic error code.
    * @param httpCode - HTTP status code (default: 500).
+   * @param validationErrors - Optional object containing validation failure details.
    * @param metadata - Additional metadata to be included in debug mode.
    */
   constructor(
-    public code: string,
     public override message: string,
-    public validationErrors?: unknown,
+    public code: string,
     public httpCode: number = 500,
+    public validationErrors?: unknown,
     public metadata?: Record<string, unknown>
   ) {
     super(message);
@@ -57,7 +57,7 @@ export class HttpError extends Error {
  */
 export class NotFoundError extends HttpError {
   constructor(message: string = 'Not Found') {
-    super('NOT_FOUND', message, undefined, 404);
+    super(message, 'NOT_FOUND', 404);
   }
 }
 
@@ -66,7 +66,7 @@ export class NotFoundError extends HttpError {
  */
 export class BadRequestError extends HttpError {
   constructor(message: string = 'Bad Request') {
-    super('BAD_REQUEST', message, undefined, 400);
+    super(message, 'BAD_REQUEST', 400);
   }
 }
 
@@ -75,7 +75,7 @@ export class BadRequestError extends HttpError {
  */
 export class UnauthorizedError extends HttpError {
   constructor(message: string = 'Unauthorized') {
-    super('UNAUTHORIZED', message, undefined, 401);
+    super(message, 'UNAUTHORIZED', 401);
   }
 }
 
@@ -84,7 +84,7 @@ export class UnauthorizedError extends HttpError {
  */
 export class ForbiddenError extends HttpError {
   constructor(message: string = 'Forbidden') {
-    super('FORBIDDEN', message, undefined, 403);
+    super(message, 'FORBIDDEN', 403);
   }
 }
 
@@ -93,6 +93,6 @@ export class ForbiddenError extends HttpError {
  */
 export class ValidationHttpError extends HttpError {
   constructor(message: string = 'Validation Error', errors?: unknown) {
-    super('VALIDATION_ERROR', message, errors, 422);
+    super(message, 'VALIDATION_ERROR', 422, errors);
   }
 }
